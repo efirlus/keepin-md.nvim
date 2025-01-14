@@ -56,7 +56,7 @@ require('keepin-md').setup({
 
 ## Comparison with bullets.vim
 
-While `keepin-md.nvim` shares some functionality with the established [bullets.vim](https://github.com/bulets-vim/bullets.vim), and that has more fluent features, it takes a different approach:
+While `keepin-md.nvim` shares some functionality with the established [bullets.vim](https://github.com/bullets-vim/bullets.vim), and that has more fluent features, it takes a different approach:
 
 ### Key Differences
 
