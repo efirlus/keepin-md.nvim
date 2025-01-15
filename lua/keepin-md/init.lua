@@ -1,29 +1,52 @@
--- lua/markdown-formatter.nvim/init.lua
-
 local M = {}
 
--- Plugin configuration with defaults
-local config = {
-  file_patterns = { "*.md", "*.markdown" },
-  markers = {
-    callout = "> ",
-    bullet = "- ",
-    checkbox = "- [ ] ",
+-- Function to toggle checkbox state
+function M.checktoggle()
+  local line = vim.api.nvim_get_current_line()
+
+  -- Patterns for different checkbox states
+  local patterns = {
+    unchecked = "^(%s*)%- %[ %]",
+    checked = "^(%s*)%- %[x%]",
   }
+
+  -- Get the indentation if any
+  local indent = line:match("^%s*") or ""
+
+  -- Check current state and transform
+  if line:match(patterns.unchecked) then
+    -- Convert unchecked to checked
+    local new_line = line:gsub(patterns.unchecked, indent .. "- [x]")
+    vim.api.nvim_set_current_line(new_line)
+  elseif line:match(patterns.checked) then
+    -- Convert plain list item to unchecked
+    local new_line = line:gsub(patterns.checked, indent .. "- [ ]")
+    vim.api.nvim_set_current_line(new_line)
+  end
+end
+
+-- Default configuration
+local config = {
+  -- Whether to enable the plugin for all markdown files by default
+  enable_by_default = true,
+  -- The patterns to match markdown files
+  patterns = { "*.md", "*.markdown" },
+  -- Whether to preserve exact spacing in callout prefixes
+  preserve_spacing = true,
 }
 
--- Helper function to detect line type
+-- Modified get_line_type function
 local function get_line_type(line)
   -- Check for callout
   if line:match("^>%s") then
     return "callout"
   end
   -- Check for checkbox (must check before bullet)
-  if line:match("^%s*-%s%[[%s?xX]%]%s") then
+  if line:match("^%s*[%-%*%+]%s%[[%s?xX]%]%s") then
     return "checkbox"
   end
-  -- Check for bullet list
-  if line:match("^%s*-%s") then
+  -- Check for bullet list with multiple markers
+  if line:match("^%s*[%-%*%+]%s") then
     return "bullet"
   end
   -- Check for numbered list
@@ -31,6 +54,44 @@ local function get_line_type(line)
     return "numbered"
   end
   return "text"
+end
+
+-- Get next number for numbered list
+local function get_next_number(line)
+  local current_num = tonumber(line:match("^%s*(%d+)%."))
+  return current_num and (current_num + 1) or 1
+end
+
+-- Modified get_marker function
+local function get_marker(line, line_type)
+  if line_type == "callout" then
+    return "> "
+  elseif line_type == "checkbox" then
+    -- Preserve the original marker type (-, *, or +)
+    local marker = line:match("^%s*([%-%*%+])%s%[")
+    return (marker or "-") .. " [ ] "
+  elseif line_type == "bullet" then
+    -- Preserve the original marker type (-, *, or +)
+    return line:match("^(%s*[%-%*%+]%s)")
+  elseif line_type == "numbered" then
+    local num = get_next_number(line)
+    return num .. ". "
+  end
+  return ""
+end
+
+-- Modified is_empty_formatted_line function
+local function is_empty_formatted_line(line, line_type)
+  if line_type == "callout" then
+    return line:match("^>%s*$")
+  elseif line_type == "checkbox" then
+    return line:match("^%s*[%-%*%+]%s%[[%s?xX]%]%s*$")
+  elseif line_type == "bullet" then
+    return line:match("^%s*[%-%*%+]%s*$")
+  elseif line_type == "numbered" then
+    return line:match("^%s*%d+%.%s*$")
+  end
+  return false
 end
 
 -- Get indentation level of current line
@@ -42,36 +103,6 @@ end
 local function get_next_number(line)
   local current_num = tonumber(line:match("^%s*(%d+)%."))
   return current_num and (current_num + 1) or 1
-end
-
--- Extract marker from line based on type
-local function get_marker(line, line_type)
-  if line_type == "callout" then
-    -- Only return "> " for continuation, don't include the callout type
-    return "> "
-  elseif line_type == "checkbox" then
-    return "- [ ] "
-  elseif line_type == "bullet" then
-    return line:match("^(%s*-%s)")
-  elseif line_type == "numbered" then
-    local num = get_next_number(line)
-    return num .. ". "
-  end
-  return ""
-end
-
--- Check if line is empty (ignoring markers and whitespace)
-local function is_empty_formatted_line(line, line_type)
-  if line_type == "callout" then
-    return line:match("^>%s*$")
-  elseif line_type == "checkbox" then
-    return line:match("^%s*-%s%[[%s?xX]%]%s*$")
-  elseif line_type == "bullet" then
-    return line:match("^%s*-%s*$")
-  elseif line_type == "numbered" then
-    return line:match("^%s*%d+%.%s*$")
-  end
-  return false
 end
 
 -- Handle <CR> keypress

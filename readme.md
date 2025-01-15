@@ -5,8 +5,8 @@ A lightweight Neovim plugin for enhanced Markdown editing with smart list contin
 ## Features
 
 - Smart list continuation for various types of Markdown lists:
-  - Bullet points (`- `)
-  - Checkboxes (`- [ ] `)
+  - Bullet points (`- `, `+ `, `* `)
+  - Checkboxes (`- [ ] `, `+ [ ] `, `* [ ] `)
   - Numbered lists (auto-incrementing)
   - Callouts (`> `)
 
@@ -25,33 +25,22 @@ A lightweight Neovim plugin for enhanced Markdown editing with smart list contin
 
 ## Installation
 
-Using [packer.nvim](https://github.com/wbthomason/packer.nvim):
-
-```lua
-use('username/keepin-md.nvim')
-```
-
 Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ```lua
 {
     'username/keepin-md.nvim',
-    ft = { 'markdown' },
+    config = function()
+      require('keepin-md').setup()
+    end
 }
 ```
 
-## Setup
+AI said this can get some configuration options, but it was not. I tested.
+Just setup, and checkbox toggle key set as your own.
 
 ```lua
-require('keepin-md').setup({
-    -- Optional configuration
-    file_patterns = { "*.md", "*.markdown" },
-    markers = {
-        callout = "> ",
-        bullet = "- ",
-        checkbox = "- [ ] ",
-    }
-})
+vim.keymap.set('n', '<leader>ic', require('keepin-md').checktoggle)
 ```
 
 ## Comparison with bullets.vim
@@ -80,10 +69,12 @@ While `keepin-md.nvim` shares some functionality with the established [bullets.v
 |---------|----------------|-------------|
 | Basic list continuation | ✓ | ✓ |
 | Checkbox support | ✓ | ✓ |
+| Bullet variations support | ✓ | ✓ |
 | Numbered lists | ✓ | ✓ |
 | Indentation in insert mode | ✓ | ✓ |
 | Empty list termination | ✓ | ✓ |
 | Markdown callouts | ✓ | ✗ |
+| Checkbox toggle keymap support | ✓ | ✗ |
 | Alphabetic lists | ✗ | ✓ |
 | Roman numerals | ✗ | ✓ |
 | Nested numerical bullets | ✗ | ✓ |
