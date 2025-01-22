@@ -39,31 +39,6 @@ function M.checktoggle()
     end
 end
 
--- -- Function to toggle checkbox state
--- function M.checktoggle()
---   local line = vim.api.nvim_get_current_line()
---
---   -- Patterns for different checkbox states
---   local patterns = {
---     unchecked = "^(%s*)%- %[ %]",
---     checked = "^(%s*)%- %[x%]",
---   }
---
---   -- Get the indentation if any
---   local indent = line:match("^%s*") or ""
---
---   -- Check current state and transform
---   if line:match(patterns.unchecked) then
---     -- Convert unchecked to checked
---     local new_line = line:gsub(patterns.unchecked, indent .. "- [x]")
---     vim.api.nvim_set_current_line(new_line)
---   elseif line:match(patterns.checked) then
---     -- Convert plain list item to unchecked
---     local new_line = line:gsub(patterns.checked, indent .. "- [ ]")
---     vim.api.nvim_set_current_line(new_line)
---   end
--- end
-
 -- Default configuration
 local config = {
     -- Whether to enable the plugin for all markdown files by default
